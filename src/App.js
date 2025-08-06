@@ -1,6 +1,6 @@
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image} from 'react-native';
-import { useQuery } from '@tanstack/react-query';//Hook para fazer queries
-import { fetchPosts } from './api/posts'
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, Button} from 'react-native';
+import { useQuery, useMutation } from '@tanstack/react-query';//Hook para fazer queries
+import { fetchPosts, createUser } from './api/posts'
 
 
 export default function App() {
@@ -9,6 +9,19 @@ export default function App() {
         queryKey: ['posts'], //Chave da query
         queryFn: fetchPosts //Função que busca os dados
     });
+
+    //Mutation para criar um novo usuário
+    const  mutation = useMutation({
+        mutationFn: createUser, //Função que cria o usuário
+        onSuccess: () => {
+            refetch(); //Refaz a query para atualizar a lista de usuários
+        }
+    })    
+    
+    const newUser = {
+        name: "Exemplo",
+        avatar: "https://avatars.githubusercontent.com/u/75419383"
+    }
 
     //Exibe um carregando enquanto os dados não chegam
     if (isLoading) {
@@ -26,17 +39,25 @@ export default function App() {
     }
 
     return(
-        <FlatList
-            data={data}
-            refreshing={isFetching}//Mostra o spinner durante o refetch
-            onRefresh={refetch}//Chamada automatica do refetch ao puxar para baixo
-            renderItem={({item})=>(
-                <View style={styles.item}> 
-                    <Text style={styles.title}>{item.name}</Text>
-                    <Image source={{uri: item.avatar}} style={{ width: 100, height: 100,}}></Image>
-                </View> 
-            )}
+        <>
+            <Button 
+                title={mutation.isPending?'Criando Usuario...':'Criar Novo Usuario'} 
+                onPress={() => mutation.mutate(newUser)}
+                disabled={mutation.isPending}
+            />
+            <FlatList
+                data={data}
+                refreshing={isFetching}//Mostra o spinner durante o refetch
+                onRefresh={refetch}//Chamada automatica do refetch ao puxar para baixo
+                renderItem={({item})=>(
+                    <View style={styles.item}> 
+                        <Text style={styles.title}>{item.name}</Text>
+                        <Image source={{uri: item.avatar}} style={{ width: 100, height: 100,}}></Image>
+                        
+                    </View> 
+                )}
         />
+    </>
     )
 }
 
