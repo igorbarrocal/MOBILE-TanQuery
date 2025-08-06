@@ -1,5 +1,5 @@
 import App from "./src/App";
-import { QueryClientProvider } from "@tanstack/react-query";
+import QueryClientProvider  from "./src/QueryClientProvider";
 
 export default function Main(){
   return(
